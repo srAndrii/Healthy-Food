@@ -1,118 +1,96 @@
-/* Задания на урок:
-1) Реализовать функционал, что после заполнения формы и нажатия кнопки "Подтвердить" - 
-новый фильм добавляется в список. Страница не должна перезагружаться.
-Новый фильм должен добавляться в movieDB.movies.
-Для получения доступа к значению input - обращаемся к нему как input.value;
-P.S. Здесь есть несколько вариантов решения задачи, принимается любой, но рабочий.
-
-2) Если название фильма больше, чем 21 символ - обрезать его и добавить три точки
-
-3) При клике на мусорную корзину - элемент будет удаляться из списка (сложно)
-
-4) Если в форме стоит галочка "Сделать любимым" - в консоль вывести сообщение: 
-"Добавляем любимый фильм"
-
-5) Фильмы должны быть отсортированы по алфавиту */
-
-'use strict';
-document.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', () => {
+    // Tab
+    const tabs = document.querySelectorAll('.tabheader__item'),
+        tabsContent = document.querySelectorAll('.tabcontent'),
+        tabsParrent = document.querySelector('.tabheader__items');
     
-    const movieDB = {
-        movies: [
-            "Логан",
-            "Лига справедливости",
-            "Ла-ла лэнд",
-            "Одержимость",
-            "Скотт Пилигрим против..."
-        ]
-    };
-
-    const adv = document.querySelectorAll(".promo__adv img"),
-        poster = document.querySelector('.promo__bg'),
-        genre = document.querySelector(".promo__genre"),
-        movieList = document.querySelector('.promo__interactive-list'),
-        addForm = document.querySelector("form.add"),
-        addInput = addForm.querySelector('.adding__input'),
-        checkbox = addForm.querySelector('[type="checkbox"]');
-
-    addForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-
-        let newFilm = addInput.value;
-        const favorite = checkbox.checked;
-
-        if (newFilm) {
-
-            if (newFilm.length > 21) {
-                newFilm = `${newFilm.substring(0, 22)}...`;
-            }
-            if (favorite) {
-                console.log('Добавляем любимый фильм');
-            }
-            movieDB.movies.push(newFilm);
-            sortArr(movieDB.movies);
-
-            creatMovieList(movieDB.movies, movieList);
-        }
+    function hideTabContent() {
+        tabsContent.forEach(item => {
+            item.classList.add('hide');
+            item.classList.remove('show', 'fade');
+        });
         
-        event.target.reset();
-        // addForm.reset();то саме що на ряд вище
-
-    })
-
-    const deleteAdv = (arr) => {
-        arr.forEach(item => {
-            item.remove();
+        tabs.forEach(item => {
+            item.classList.remove('tabheader__item_active');
         });
-
-    };
-
-    const makeChanges = () => {
-        genre.textContent = 'драма';
-
-        poster.style.backgroundImage = 'url("img/bg.jpg")';
-    };
-    
-
-    const sortArr = (arr) => {
-        arr.sort();
-    };
-    
-    function creatMovieList(films, parent) {
-
-        parent.innerHTML = "";
-        sortArr(films);
-
-
-        films.forEach((film, i) => {
-            parent.innerHTML += `
-                <li class="promo__interactive-item">${i + 1}. ${film}
-                    <div class="delete"></div>
-                </li>
-            `;
-        });
-
-        document.querySelectorAll(".delete").forEach((btn, i) => {
-            btn.addEventListener('click', () => {
-                btn.parentElement.remove();
-                movieDB.movies.splice(i, 1);
-                
-                creatMovieList(films, parent);               
-            })
-        })
     }
 
+    function showTabContent(i = 0) {
+        tabsContent[i].classList.add('show', 'fade');
+        tabsContent[i].classList.remove('hide');
 
-    deleteAdv(adv);
-    makeChanges();
+        tabs[i].classList.add('tabheader__item_active');
+    }
 
-    creatMovieList(movieDB.movies, movieList);
+    hideTabContent();
+    showTabContent();
+    
+    tabsParrent.addEventListener('click', (event) => {
+        const target = event.target;
+         
+        if (target && target.classList.contains('tabheader__item')) {
+            tabs.forEach((item, i) => {
+                if (target == item) {
+                    hideTabContent();
+                    showTabContent(i);
+                }
+            });
+        }
+    });
 
+    // Timer
 
+    const deadline = '2022-03-11';
 
+    function getTimeRemaining(endtime) {
+        const t = Date.parse(endtime) - Date.parse(new Date()),
+            days = Math.floor(t / (1000 * 60 * 60 * 24)),
+            hours = Math.floor((t / (1000 * 60 * 60) % 24)),
+            minutes = Math.floor((t / 1000 / 60) % 60),
+            seconds = Math.floor((t / 1000) % 60);
+        
+        return {
+            'total': t,
+            'days': days,
+            'hours': hours,
+            'minutes': minutes,
+            'seconds': seconds
 
+        }
 
+    }
+
+    function getZero(num) {
+        if (num >= 0 && num < 10) {
+            return `0${num}`;
+        } else {
+            return num;
+        }
+    }
+
+    function setClock(selector, endtime) {
+        const timer = document.querySelector(selector),
+            days = timer.querySelector('#days'),
+            hours = timer.querySelector('#hours'),
+            minutes = timer.querySelector('#minutes'),
+            seconds = timer.querySelector('#seconds'),
+            timeInterval = setInterval(updateClock, 1000);
+        
+        updateClock();
+
+        function updateClock() {
+            const t = getTimeRemaining(endtime);
+            days.innerHTML = getZero(t.days);
+            hours.innerHTML = getZero(t.hours);
+            minutes.innerHTML = getZero(t.minutes);
+            seconds.innerHTML = getZero(t.seconds);
+
+            if (t.total <= 0) {
+                clearInterval(timeInterval);
+            }
+
+        }
+    }
+    setClock('.timer', deadline);
 
 });
-
-
